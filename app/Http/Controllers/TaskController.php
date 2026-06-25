@@ -11,15 +11,12 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request) // Request অবজেক্ট প্যারামিটার হিসেবে নেওয়া হলো
     {
-        // Eager load category to prevent N+1 query issue
-        $tasks = Task::with('category')->get();
-        return response()->json([
-            'success' => true,
-            'message' => 'Tasks fetched successfully',
-            'data' => TaskResource::collection($tasks)->resolve(),
-        ]);
+        // শুধুমাত্র বর্তমান লগইন করা ইউজারের টাস্কগুলো নিয়ে আসবে
+        $tasks = $request->user()->tasks()->with('category')->get();
+        
+        return TaskResource::collection($tasks);
     }
 
     /**
@@ -29,38 +26,31 @@ class TaskController extends Controller
     {
         // ইনপুট ভ্যালিডেশন
         $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id', // ক্যাটাগরি আইডিটি অবশ্যই categories টেবিলে থাকতে হবে
+            'category_id' => 'required|exists:categories,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_completed' => 'nullable|boolean',
             'due_date' => 'nullable|date',
         ]);
 
-        // ডাটাবেজে সেভ
-        $task = Task::create($validated);
+        // লগইন করা ইউজারের রিলেশন ব্যবহার করে টাস্ক তৈরি (এতে user_id অটোমেটিক বসে যাবে)
+        $task = $request->user()->tasks()->create($validated);
 
-        // সেভ করার পর ক্যাটাগরি রিলেশন লোড করে নেওয়া
         $task->load('category');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Task created successfully',
-            'data' => (new TaskResource($task))->resolve(),
-        ], 201);
+        return new TaskResource($task);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Task $task)
+    public function show(Request $request, Task $task)
     {
-        // টাস্ক দেখানোর সময় তার ক্যাটাগরি লোড করে নেওয়া
+        // টাস্কটি বর্তমান ইউজারের কিনা যাচাই করা (অন্য ইউজারের হলে ৪0৩ এরর দেবে)
+        abort_if($task->user_id !== $request->user()->id, 403, 'Unauthorized.');
+
         $task->load('category');
-        return response()->json([
-            'success' => true,
-            'message' => 'Task fetched successfully',
-            'data' => (new TaskResource($task))->resolve(),
-        ]);
+        return new TaskResource($task);
     }
 
     /**
@@ -68,7 +58,9 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        // ইনপুট ভ্যালিডেশন
+        // টাস্কটি বর্তমান ইউজারের কিনা যাচাই করা
+        abort_if($task->user_id !== $request->user()->id, 403, 'Unauthorized.');
+
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'title' => 'required|string|max:255',
@@ -78,27 +70,21 @@ class TaskController extends Controller
         ]);
 
         $task->update($validated);
-
-        // আপডেট করার পর ক্যাটাগরি রিলেশন লোড করা
         $task->load('category');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Task updated successfully',
-            'data' => (new TaskResource($task))->resolve(),
-        ]);
+        return new TaskResource($task);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Task $task)
+    public function destroy(Request $request, Task $task)
     {
+        // টাস্কটি বর্তমান ইউজারের কিনা যাচাই করা
+        abort_if($task->user_id !== $request->user()->id, 403, 'Unauthorized.');
+
         $task->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Task deleted successfully',
-        ]);
+        return response()->noContent();
     }
 }

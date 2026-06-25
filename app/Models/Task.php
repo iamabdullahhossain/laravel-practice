@@ -13,6 +13,7 @@ class Task extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'category_id',
         'title',
         'description',
@@ -23,6 +24,11 @@ class Task extends Model
     /**
      * Get the category that owns the task.
      */
+   public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

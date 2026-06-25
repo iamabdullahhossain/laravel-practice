@@ -1,18 +1,112 @@
 {
 	"info": {
 		"_postman_id": "c1f7871b-a5d6-4447-b8db-4e78dbf14545",
-		"name": "Laravel Practice - Task Manager API",
-		"description": "API collection for Categories and Tasks built in Laravel.",
+		"name": "Laravel Practice - Task Manager API (with Auth)",
+		"description": "API collection for Categories and Tasks with Sanctum Bearer Token Authentication.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Categories",
+			"name": "Auth",
 			"item": [
 				{
-					"name": "List Categories",
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access_token) {",
+									"    pm.collectionVariables.set(\"token\", jsonData.access_token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
-						"method": "GET",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Abdullah Hossain\",\n    \"username\": \"iamabdulllahhossain\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access_token) {",
+									"    pm.collectionVariables.set(\"token\", jsonData.access_token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"iamabdulllahhossain\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
 						"header": [
 							{
 								"key": "Accept",
@@ -20,6 +114,29 @@
 								"type": "text"
 							}
 						],
+						"url": {
+							"raw": "{{base_url}}/api/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "List Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/categories",
 							"host": [
@@ -39,11 +156,6 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
@@ -51,7 +163,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Work\"\n}"
+							"raw": "{\n    \"name\": \"Personal\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/categories",
@@ -70,13 +182,7 @@
 					"name": "Show Category",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/categories/1",
 							"host": [
@@ -97,11 +203,6 @@
 						"method": "PUT",
 						"header": [
 							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
@@ -109,7 +210,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Office Work\"\n}"
+							"raw": "{\n    \"name\": \"Personal Updated\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/categories/1",
@@ -129,13 +230,7 @@
 					"name": "Delete Category",
 					"request": {
 						"method": "DELETE",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/categories/1",
 							"host": [
@@ -159,13 +254,7 @@
 					"name": "List Tasks",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/tasks",
 							"host": [
@@ -185,11 +274,6 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
@@ -197,7 +281,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"category_id\": 1,\n    \"title\": \"Complete Laravel API Guide\",\n    \"description\": \"Write resource controllers, validations and tests.\",\n    \"due_date\": \"2026-07-01\",\n    \"is_completed\": false\n}"
+							"raw": "{\n    \"category_id\": 1,\n    \"title\": \"Complete Sanctum Auth Guide\",\n    \"description\": \"Write tests and endpoints.\",\n    \"due_date\": \"2026-07-01\",\n    \"is_completed\": false\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/tasks",
@@ -216,13 +300,7 @@
 					"name": "Show Task",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/tasks/1",
 							"host": [
@@ -243,11 +321,6 @@
 						"method": "PUT",
 						"header": [
 							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
@@ -255,7 +328,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"category_id\": 1,\n    \"title\": \"Complete Laravel API Guide - Updated\",\n    \"description\": \"Write resource controllers, validations, tests, and run Pint.\",\n    \"due_date\": \"2026-07-05\",\n    \"is_completed\": true\n}"
+							"raw": "{\n    \"category_id\": 1,\n    \"title\": \"Complete Sanctum Auth Guide - Done\",\n    \"description\": \"Write tests and endpoints.\",\n    \"due_date\": \"2026-07-01\",\n    \"is_completed\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/tasks/1",
@@ -275,13 +348,7 @@
 					"name": "Delete Task",
 					"request": {
 						"method": "DELETE",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/tasks/1",
 							"host": [
@@ -299,10 +366,45 @@
 			]
 		}
 	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
 	"variable": [
 		{
 			"key": "base_url",
 			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
 			"type": "string"
 		}
 	]
