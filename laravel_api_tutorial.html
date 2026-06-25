@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laravel API Development Guide - A Pair Programming Journey</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #e0e7ff;
+            --text-dark: #1f2937;
+            --text-muted: #4b5563;
+            --bg-light: #f9fafb;
+            --bg-card: #ffffff;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --info: #0ea5e9;
+            --info-light: #e0f2fe;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+            line-height: 1.6;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Cover Page Styling */
+        .cover-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 80vh;
+            padding: 40px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 60px;
+            background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+            color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .cover-badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .cover-title {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .cover-subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+
+        .cover-meta {
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 24px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Content Sections */
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #111827;
+            margin-top: 40px;
+            margin-bottom: 16px;
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+            letter-spacing: -0.01em;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #374151;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        ul, ol {
+            margin-bottom: 20px;
+            padding-left: 24px;
+            color: var(--text-muted);
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Chat bubbles */
+        .chat-bubble {
+            margin-bottom: 24px;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-card);
+        }
+
+        .chat-user {
+            border-left: 4px solid var(--info);
+            background-color: #f0f9ff;
+        }
+
+        .chat-assistant {
+            border-left: 4px solid var(--primary);
+            background-color: #fafafa;
+        }
+
+        .chat-header {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-user .chat-header {
+            color: var(--info);
+        }
+
+        .chat-assistant .chat-header {
+            color: var(--primary);
+        }
+
+        /* Code Blocks */
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            border: 1px solid #2e2e3e;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background-color: #e5e7eb;
+            color: #1f2937;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+            font-size: inherit;
+        }
+
+        /* Highlight Boxes */
+        .alert-box {
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background-color: var(--success-light);
+            border-color: var(--success);
+            color: #065f46;
+        }
+
+        .alert-info {
+            background-color: var(--info-light);
+            border-color: var(--info);
+            color: #075985;
+        }
+
+        .alert-note {
+            background-color: #fef3c7;
+            border-color: #d97706;
+            color: #92400e;
+        }
+
+        /* Page Break for Printing */
+        .page-break {
+            page-break-before: always;
+        }
+
+        /* Print Specific Styles */
+        @media print {
+            body {
+                background-color: white;
+                color: black;
+                font-size: 11pt;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 0;
+            }
+
+            .cover-page {
+                height: 95vh;
+                border-radius: 0;
+                box-shadow: none;
+                background: white !important;
+                color: black !important;
+                border: 2px solid black;
+                padding: 60px;
+            }
+
+            .cover-badge {
+                color: black;
+                border: 1px solid black;
+            }
+
+            .cover-title {
+                color: black !important;
+            }
+
+            .cover-subtitle {
+                color: #555 !important;
+            }
+
+            .cover-meta {
+                color: black !important;
+                border-top: 1px solid black;
+            }
+
+            pre {
+                background-color: #f3f4f6 !important;
+                color: black !important;
+                border: 1px solid #ccc !important;
+                page-break-inside: avoid;
+                font-size: 9.5pt;
+            }
+
+            .chat-bubble {
+                page-break-inside: avoid;
+                border: 1px solid #ccc !important;
+                background-color: white !important;
+            }
+
+            .chat-user {
+                border-left: 4px solid #555 !important;
+            }
+
+            .chat-assistant {
+                border-left: 4px solid #111 !important;
+            }
+
+            h2, h3 {
+                page-break-after: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Cover Page -->
+        <div class="cover-page">
+            <span class="cover-badge">Laravel Training Manual</span>
+            <h1 class="cover-title">Laravel 13 API Development</h1>
+            <p class="cover-subtitle">A Step-by-Step Pair Programming Guide to Building & Testing REST APIs</p>
+            <div class="cover-meta">
+                <span><strong>Developer:</strong> User & Antigravity (AI Coding Assistant)</span>
+                <span><strong>Date:</strong> June 2026</span>
+                <span><strong>Frameworks:</strong> Laravel 13 & Pest PHP</span>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Section 1: Intro & Objective -->
+        <h2>Project Scope & Objectives</h2>
+        <p>This guide acts as a complete reference for building a clean, modern REST API in <strong>Laravel 13</strong> from scratch. The system is designed to manage <strong>Tasks</strong> categorized under different <strong>Categories</strong>, implementing database relationships, controllers, request validation, Eloquent resources, and automated testing with <strong>Pest PHP</strong>.</p>
+        
+        <div class="alert-box alert-info">
+            <strong>Key Architecture Decisions:</strong>
+            <ul>
+                <li>SQLite was selected as the database for local development simplicity.</li>
+                <li>Pest PHP was configured for automated unit and integration tests.</li>
+                <li>Eloquent API Resources were introduced to keep response schemas decoupled from database tables.</li>
+            </ul>
+        </div>
+
+        <!-- Section 2: Step-by-Step Chronology -->
+        <h2>Step 1: Setup API Routing</h2>
+        <p>Since Laravel 11+, API routes are not enabled by default. We enabled them by running the installer:</p>
+        <pre><code>php artisan install:api</code></pre>
+        <p>This generated the <code>routes/api.php</code> file and configured Laravel Sanctum for API token authentication.</p>
+
+        <h2>Step 2: Database Migration & Model Generation</h2>
+        <p>We created the Models, Migration files, and Factories for both <code>Category</code> and <code>Task</code> in a single go using the artisan generator:</p>
+        <pre><code>php artisan make:model Category -m -f
+php artisan make:model Task -m -f</code></pre>
+
+        <h3>Defining the Category Migration</h3>
+        <p>File location: <code>database/migrations/[timestamp]_create_categories_table.php</code></p>
+        <pre><code>Schema::create('categories', function (Blueprint $table) {
+    $table->id();
+    $table->string('name')->unique();
+    $table->string('slug')->unique();
+    $table->timestamps();
+});</code></pre>
+
+        <h3>Defining the Task Migration</h3>
+        <p>File location: <code>database/migrations/[timestamp]_create_tasks_table.php</code></p>
+        <pre><code>Schema::create('tasks', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+    $table->string('title');
+    $table->text('description')->nullable();
+    $table->boolean('is_completed')->default(false);
+    $table->date('due_date')->nullable();
+    $table->timestamps();
+});</code></pre>
+
+        <p>We then executed the migrations to create the tables in our SQLite database:</p>
+        <pre><code>php artisan migrate</code></pre>
+
+        <div class="page-break"></div>
+
+        <h2>Step 3: Relationships, Factories & Database Seeding</h2>
+        
+        <h3>Category Model Relationships (<code>app/Models/Category.php</code>)</h3>
+        <p>We declared the mass-assignment fillable attributes and defined a <code>hasMany</code> relation pointing to tasks:</p>
+        <pre><code>protected $fillable = ['name', 'slug'];
+
+public function tasks(): HasMany
+{
+    return $this->hasMany(Task::class);
+}</code></pre>
+
+        <h3>Task Model Relationships (<code>app/Models/Task.php</code>)</h3>
+        <p>We configured the fillable array and defined the inverse relation <code>belongsTo</code>:</p>
+        <pre><code>protected $fillable = [
+    'category_id',
+    'title',
+    'description',
+    'is_completed',
+    'due_date',
+];
+
+public function category(): BelongsTo
+{
+    return $this->belongsTo(Category::class);
+}</code></pre>
+
+        <h3>Factories (Generating Fake Data)</h3>
+        <p>We defined structures in <code>CategoryFactory.php</code> and <code>TaskFactory.php</code>:</p>
+        <pre><code>// CategoryFactory definition:
+$name = $this->faker->unique()->word();
+return [
+    'name' => ucfirst($name),
+    'slug' => \Illuminate\Support\Str::slug($name),
+];
+
+// TaskFactory definition:
+return [
+    'category_id' => Category::factory(),
+    'title' => $this->faker->sentence(),
+    'description' => $this->faker->paragraph(),
+    'is_completed' => $this->faker->boolean(20),
+    'due_date' => $this->faker->dateTimeBetween('now', '+1 month')->format('Y-m-d'),
+];</code></pre>
+
+        <h3>Database Seeding (<code>database/seeders/DatabaseSeeder.php</code>)</h3>
+        <p>We configured the database to seed 5 categories, with 5 tasks under each category:</p>
+        <pre><code>$categories = Category::factory(5)->create();
+
+foreach ($categories as $category) {
+    Task::factory(5)->create([
+        'category_id' => $category->id,
+    ]);
+}</code></pre>
+
+        <p>To populate the database, we ran:</p>
+        <pre><code>php artisan db:seed</code></pre>
+
+        <div class="page-break"></div>
+
+        <h2>Step 4: Eloquent API Resources</h2>
+        <p>We created Resource files to decouple our database layer schemas from the actual API JSON responses:</p>
+        <pre><code>php artisan make:resource CategoryResource
+php artisan make:resource TaskResource</code></pre>
+
+        <h3>CategoryResource (<code>app/Http/Resources/CategoryResource.php</code>)</h3>
+        <pre><code>public function toArray(Request $request): array
+{
+    return [
+        'id' => $this->id,
+        'name' => $this->name,
+        'slug' => $this->slug,
+        'created_at' => $this->created_at->toDateTimeString(),
+    ];
+}</code></pre>
+
+        <h3>TaskResource (<code>app/Http/Resources/TaskResource.php</code>)</h3>
+        <pre><code>public function toArray(Request $request): array
+{
+    return [
+        'id' => $this->id,
+        'category_id' => $this->category_id,
+        'category' => new CategoryResource($this->whenLoaded('category')),
+        'title' => $this->title,
+        'description' => $this->description,
+        'is_completed' => (bool) $this->is_completed,
+        'due_date' => $this->due_date,
+        'created_at' => $this->created_at->toDateTimeString(),
+    ];
+}</code></pre>
+
+        <h2>Step 5: Controllers & Validation</h2>
+        <p>We created controllers using the <code>--api</code> flag:</p>
+        <pre><code>php artisan make:controller CategoryController --api
+php artisan make:controller TaskController --api</code></pre>
+
+        <h3>Category Controller (<code>app/Http/Controllers/CategoryController.php</code>)</h3>
+        <p>Implements Route Model Binding for <code>show</code>, <code>update</code>, and <code>destroy</code> methods:</p>
+        <pre><code>class CategoryController extends Controller
+{
+    public function index()
+    {
+        return CategoryResource::collection(Category::all());
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|unique:categories,name|max:255',
+        ]);
+        $validated['slug'] = Str::slug($validated['name']);
+        $category = Category::create($validated);
+        return new CategoryResource($category);
+    }
+
+    public function show(Category $category)
+    {
+        return new CategoryResource($category);
+    }
+
+    public function update(Request $request, Category $category)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|unique:categories,name,' . $category->id . '|max:255',
+        ]);
+        $validated['slug'] = Str::slug($validated['name']);
+        $category->update($validated);
+        return new CategoryResource($category);
+    }
+
+    public function destroy(Category $category)
+    {
+        $category->delete();
+        return response()->noContent();
+    }
+}</code></pre>
+
+        <div class="page-break"></div>
+
+        <h3>Task Controller (<code>app/Http/Controllers/TaskController.php</code>)</h3>
+        <p>Implements eager loading of category relation via <code>with('category')</code> to prevent N+1 performance problems:</p>
+        <pre><code>class TaskController extends Controller
+{
+    public function index()
+    {
+        $tasks = Task::with('category')->get();
+        return TaskResource::collection($tasks);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'is_completed' => 'nullable|boolean',
+            'due_date' => 'nullable|date',
+        ]);
+
+        $task = Task::create($validated);
+        $task->load('category');
+        return new TaskResource($task);
+    }
+
+    public function show(Task $task)
+    {
+        $task->load('category');
+        return new TaskResource($task);
+    }
+
+    public function update(Request $request, Task $task)
+    {
+        $validated = $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'is_completed' => 'required|boolean',
+            'due_date' => 'nullable|date',
+        ]);
+
+        $task->update($validated);
+        $task->load('category');
+        return new TaskResource($task);
+    }
+
+    public function destroy(Task $task)
+    {
+        $task->delete();
+        return response()->noContent();
+    }
+}</code></pre>
+
+        <h2>Step 6: Register API Routes (<code>routes/api.php</code>)</h2>
+        <pre><code>use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TaskController;
+
+Route::apiResource('categories', CategoryController::class);
+Route::apiResource('tasks', TaskController::class);</code></pre>
+
+        <div class="page-break"></div>
+
+        <h2>Step 7: Testing with Pest PHP</h2>
+        <p>We enabled <code>RefreshDatabase</code> in our <code>tests/Pest.php</code> file to reset the database state between test runs:</p>
+        <pre><code>pest()->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
+    ->in('Feature');</code></pre>
+
+        <h3>Category API Testing (<code>tests/Feature/CategoryApiTest.php</code>)</h3>
+        <p>We wrote 5 comprehensive tests to assert database state, response codes (200, 201, 204, 422), and validation errors:</p>
+        <pre><code>test('can list all categories', function () {
+    Category::factory()->count(3)->create();
+    $response = $this->getJson('/api/categories');
+    $response->assertStatus(200)->assertJsonCount(3, 'data');
+});
+
+test('can create a category', function () {
+    $response = $this->postJson('/api/categories', ['name' => 'Urgent Tasks']);
+    $response->assertStatus(201)
+        ->assertJsonPath('data.name', 'Urgent Tasks')
+        ->assertJsonPath('data.slug', 'urgent-tasks');
+    $this->assertDatabaseHas('categories', ['name' => 'Urgent Tasks']);
+});
+
+test('validation prevents duplicate category name', function () {
+    Category::factory()->create(['name' => 'Work']);
+    $response = $this->postJson('/api/categories', ['name' => 'Work']);
+    $response->assertStatus(422)->assertJsonValidationErrors(['name']);
+});</code></pre>
+
+        <h3>Task API Testing (<code>tests/Feature/TaskApiTest.php</code>)</h3>
+        <p>We wrote 6 tests asserting eager loading formats, database state on creation, and invalid category IDs:</p>
+        <pre><code>test('can list all tasks with categories', function () {
+    Task::factory()->create();
+    $response = $this->getJson('/api/tasks');
+    $response->assertStatus(200)
+        ->assertJsonCount(1, 'data')
+        ->assertJsonStructure(['data' => ['*' => ['category' => ['name']]]]);
+});
+
+test('validation prevents creating task with non-existent category', function () {
+    $response = $this->postJson('/api/tasks', [
+        'category_id' => 999,
+        'title' => 'Invalid Category Task',
+    ]);
+    $response->assertStatus(422)->assertJsonValidationErrors(['category_id']);
+});</code></pre>
+
+        <h3>Running Tests Command</h3>
+        <pre><code>php artisan test --compact</code></pre>
+        <p><strong>Result:</strong> <code>13 passed (47 assertions)</code></p>
+        <p>This proves that the controllers, validation rules, migrations, database relationships, and JSON formatting are perfectly aligned and functional.</p>
+
+        <div class="alert-box alert-success">
+            <strong>All Tests Passed Successfully!</strong>
+            <br>
+            All endpoints are validated, secured against validation failures, and database transactions roll back automatically after each test.
+        </div>
+    </div>
+</body>
+</html>
