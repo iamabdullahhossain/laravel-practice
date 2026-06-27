@@ -1,11 +1,12 @@
 <?php
 
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -16,12 +17,27 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->redirectGuestsTo(function (Request $request) {
+            if ($request->is('api/*')) {
+                return null;
+            }
+
+            return Route::has('login') ? route('login') : null;
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Please login first.',
+                ], 401);
+            }
+        });
 
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
             if ($request->is('api/*')) {
@@ -30,13 +46,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 if ($e->getPrevious() instanceof ModelNotFoundException) {
                     $modelClass = $e->getPrevious()->getModel();
                     $modelName = class_basename($modelClass);
-                    $message = $modelName . ' not found';
+                    $message = $modelName.' not found';
                 }
 
                 return response()->json([
                     'success' => false,
                     'message' => $message,
-                    'data' => []
+                    'data' => [],
                 ], 404);
             }
         });
@@ -47,8 +63,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
                 return response()->json([
                     'success' => false,
-                    'message' => $modelName . ' not found',
-                    'data' => []
+                    'message' => $modelName.' not found',
+                    'data' => [],
                 ], 404);
             }
         });
