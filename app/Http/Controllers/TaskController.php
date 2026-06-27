@@ -30,8 +30,9 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'nullable|string|in:todo,in_progress,completed,due',
-
             'due_date' => 'nullable|date',
+            'due_time' => 'nullable|date_format:H:i',
+
         ]);
 
         // লগইন করা ইউজারের রিলেশন ব্যবহার করে টাস্ক তৈরি (এতে user_id অটোমেটিক বসে যাবে)
@@ -68,8 +69,9 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|string|in:todo,in_progress,completed,due',
-
             'due_date' => 'nullable|date',
+            'due_time' => 'nullable|date_format:H:i',
+
         ]);
 
         $task->update($validated);
@@ -89,5 +91,41 @@ class TaskController extends Controller
         $task->delete();
 
         return response()->noContent();
+    }
+
+    /**
+     * Update only the status of the specified task.
+     */
+    public function updateStatus(Request $request, Task $task)
+    {
+        // টাস্কটি বর্তমান ইউজারের কিনা যাচাই করা
+        abort_if($task->user_id !== $request->user()->id, 403, 'Unauthorized.');
+
+        // শুধুমাত্র status ফিল্ডটি ভ্যালিডেট করা হচ্ছে
+        $validated = $request->validate([
+            'status' => 'required|string|in:todo,in_progress,completed,due',
+        ]);
+
+        $task->update($validated);
+        $task->load('category');
+
+        return new TaskResource($task);
+    }
+
+    /**
+     * Get task counts grouped by status.
+     */
+    public function stats(Request $request)
+    {
+        // ইউজারের সব টাস্ক মেমোরিতে লোড করা হচ্ছে (যা মেয়াদোত্তীর্ণ টাস্কগুলোকে 'due' করে দেবে)
+        $tasks = $request->user()->tasks()->get();
+
+        return response()->json([
+            'todo' => $tasks->where('status', 'todo')->count(),
+            'in_progress' => $tasks->where('status', 'in_progress')->count(),
+            'completed' => $tasks->where('status', 'completed')->count(),
+            'due' => $tasks->where('status', 'due')->count(),
+            'total' => $tasks->count(),
+        ]);
     }
 }

@@ -1,8 +1,7 @@
 {
 	"info": {
-		"_postman_id": "c1f7871b-a5d6-4447-b8db-4e78dbf14545",
-		"name": "Laravel Practice - Task Manager API (with Auth)",
-		"description": "API collection for Categories and Tasks with Sanctum Bearer Token Authentication.",
+		"_postman_id": "0d3c015b-2407-42c2-be00-e9b41a541602",
+		"name": "Task Management API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -16,9 +15,9 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.access_token) {",
-									"    pm.collectionVariables.set(\"token\", jsonData.access_token);",
+									"const response = pm.response.json();",
+									"if (response.access_token) {",
+									"    pm.collectionVariables.set(\"token\", response.access_token);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -26,30 +25,32 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [
 							{
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Abdullah Hossain\",\n    \"username\": \"iamabdulllahhossain\",\n    \"password\": \"password123\"\n}"
+							"raw": "{\n    \"name\": \"Test User\",\n    \"username\": \"testuser1\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/register",
+							"raw": "{{base_url}}/register",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"api",
 								"register"
 							]
 						}
@@ -63,9 +64,9 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"var jsonData = pm.response.json();",
-									"if (jsonData.access_token) {",
-									"    pm.collectionVariables.set(\"token\", jsonData.access_token);",
+									"const response = pm.response.json();",
+									"if (response.access_token) {",
+									"    pm.collectionVariables.set(\"token\", response.access_token);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -73,31 +74,56 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [
 							{
 								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"iamabdulllahhossain\",\n    \"password\": \"password123\"\n}"
+							"raw": "{\n    \"username\": \"testuser1\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/login",
+							"raw": "{{base_url}}/login",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"api",
 								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Profile (Get User)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user"
 							]
 						}
 					},
@@ -115,12 +141,11 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/logout",
+							"raw": "{{base_url}}/logout",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"api",
 								"logout"
 							]
 						}
@@ -136,14 +161,19 @@
 					"name": "List Categories",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/api/categories",
+							"raw": "{{base_url}}/categories",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"api",
 								"categories"
 							]
 						}
@@ -156,22 +186,26 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Content-Type",
+								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Personal\"\n}"
+							"raw": "{\n    \"name\": \"Work\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/categories",
+							"raw": "{{base_url}}/categories",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"api",
 								"categories"
 							]
 						}
@@ -179,17 +213,22 @@
 					"response": []
 				},
 				{
-					"name": "Show Category",
+					"name": "View Category",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/api/categories/1",
+							"raw": "{{base_url}}/categories/1",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"api",
 								"categories",
 								"1"
 							]
@@ -203,22 +242,26 @@
 						"method": "PUT",
 						"header": [
 							{
-								"key": "Content-Type",
+								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Personal Updated\"\n}"
+							"raw": "{\n    \"name\": \"Office Work\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/categories/1",
+							"raw": "{{base_url}}/categories/1",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"api",
 								"categories",
 								"1"
 							]
@@ -230,14 +273,19 @@
 					"name": "Delete Category",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/api/categories/1",
+							"raw": "{{base_url}}/categories/1",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"api",
 								"categories",
 								"1"
 							]
@@ -251,17 +299,46 @@
 			"name": "Tasks",
 			"item": [
 				{
-					"name": "List Tasks",
+					"name": "Get Task Stats",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/api/tasks",
+							"raw": "{{base_url}}/tasks/stats",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"api",
+								"tasks",
+								"stats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Tasks",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/tasks",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
 								"tasks"
 							]
 						}
@@ -274,22 +351,26 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Content-Type",
+								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"category_id\": 1,\n    \"title\": \"Complete Sanctum Auth Guide\",\n    \"description\": \"Write tests and endpoints.\",\n    \"due_date\": \"2026-07-01\",\n    \"is_completed\": false\n}"
+							"raw": "{\n    \"category_id\": 1,\n    \"title\": \"Complete Project Milestone\",\n    \"description\": \"Write unit and integration tests\",\n    \"status\": \"todo\",\n    \"due_date\": \"2026-07-01\",\n    \"due_time\": \"14:30\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/tasks",
+							"raw": "{{base_url}}/tasks",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"api",
 								"tasks"
 							]
 						}
@@ -297,17 +378,22 @@
 					"response": []
 				},
 				{
-					"name": "Show Task",
+					"name": "View Task",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/api/tasks/1",
+							"raw": "{{base_url}}/tasks/1",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"api",
 								"tasks",
 								"1"
 							]
@@ -321,24 +407,62 @@
 						"method": "PUT",
 						"header": [
 							{
-								"key": "Content-Type",
+								"key": "Accept",
 								"value": "application/json",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"category_id\": 1,\n    \"title\": \"Complete Sanctum Auth Guide - Done\",\n    \"description\": \"Write tests and endpoints.\",\n    \"due_date\": \"2026-07-01\",\n    \"is_completed\": true\n}"
+							"raw": "{\n    \"category_id\": 1,\n    \"title\": \"Updated Task Title\",\n    \"description\": \"Updated description\",\n    \"status\": \"in_progress\",\n    \"due_date\": \"2026-07-05\",\n    \"due_time\": \"18:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/tasks/1",
+							"raw": "{{base_url}}/tasks/1",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"api",
 								"tasks",
 								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Task Status Only",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"completed\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks/1/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tasks",
+								"1",
+								"status"
 							]
 						}
 					},
@@ -348,14 +472,19 @@
 					"name": "Delete Task",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/api/tasks/1",
+							"raw": "{{base_url}}/tasks/1",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"api",
 								"tasks",
 								"1"
 							]
@@ -399,12 +528,12 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://127.0.0.1:8000",
+			"value": "http://127.0.0.1:8000/api",
 			"type": "string"
 		},
 		{
 			"key": "token",
-			"value": "",
+			"value": "YOUR_BEARER_TOKEN_HERE",
 			"type": "string"
 		}
 	]

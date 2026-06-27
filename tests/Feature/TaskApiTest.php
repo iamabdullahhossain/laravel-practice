@@ -32,6 +32,7 @@ test('can list all tasks with categories', function () {
                     'description',
                     'status',
                     'due_date',
+                    'due_time',
                     'created_at',
                 ],
             ],
@@ -47,17 +48,20 @@ test('can create a task', function () {
         'description' => 'Write Pest tests for all API endpoints',
         'status' => 'todo',
         'due_date' => '2026-07-01',
+        'due_time' => '14:30',
     ]);
 
     $response->assertStatus(201)
         ->assertJsonPath('data.title', 'Learn Laravel Testing')
         ->assertJsonPath('data.category.id', $category->id)
-        ->assertJsonPath('data.status', 'todo');
+        ->assertJsonPath('data.status', 'todo')
+        ->assertJsonPath('data.due_time', '14:30');
 
     $this->assertDatabaseHas('tasks', [
         'title' => 'Learn Laravel Testing',
         'category_id' => $category->id,
         'status' => 'todo',
+        'due_time' => '14:30',
     ]);
 });
 
@@ -92,16 +96,19 @@ test('can update a task', function () {
         'description' => $task->description,
         'status' => 'completed',
         'due_date' => $task->due_date,
+        'due_time' => '18:00',
     ]);
 
     $response->assertStatus(200)
         ->assertJsonPath('data.title', 'Updated Task Title')
-        ->assertJsonPath('data.status', 'completed');
+        ->assertJsonPath('data.status', 'completed')
+        ->assertJsonPath('data.due_time', '18:00');
 
     $this->assertDatabaseHas('tasks', [
         'id' => $task->id,
         'title' => 'Updated Task Title',
         'status' => 'completed',
+        'due_time' => '18:00',
     ]);
 });
 
@@ -135,6 +142,7 @@ test('expired task status is automatically changed to due when retrieved', funct
     $task = Task::factory()->create([
         'user_id' => $this->user->id,
         'due_date' => now()->subDay()->toDateString(),
+        'due_time' => '12:00',
         'status' => 'todo',
     ]);
 
@@ -146,6 +154,44 @@ test('expired task status is automatically changed to due when retrieved', funct
     $this->assertDatabaseHas('tasks', [
         'id' => $task->id,
         'status' => 'due',
+    ]);
+});
+
+test('task status is automatically changed to due when due time is in the past today', function () {
+    $task = Task::factory()->create([
+        'user_id' => $this->user->id,
+        'due_date' => now()->toDateString(),
+        'due_time' => now()->subHour()->format('H:i'), // 1 hour ago
+        'status' => 'todo',
+    ]);
+
+    $response = $this->getJson('/api/tasks');
+
+    $response->assertStatus(200)
+        ->assertJsonPath('data.0.status', 'due');
+
+    $this->assertDatabaseHas('tasks', [
+        'id' => $task->id,
+        'status' => 'due',
+    ]);
+});
+
+test('task status is not changed to due when due time is in the future today', function () {
+    $task = Task::factory()->create([
+        'user_id' => $this->user->id,
+        'due_date' => now()->toDateString(),
+        'due_time' => now()->addHour()->format('H:i'), // 1 hour from now
+        'status' => 'todo',
+    ]);
+
+    $response = $this->getJson('/api/tasks');
+
+    $response->assertStatus(200)
+        ->assertJsonPath('data.0.status', 'todo');
+
+    $this->assertDatabaseHas('tasks', [
+        'id' => $task->id,
+        'status' => 'todo',
     ]);
 });
 
@@ -177,4 +223,28 @@ test('can delete a task', function () {
     $this->assertDatabaseMissing('tasks', [
         'id' => $task->id,
     ]);
+});
+
+test('can get task status stats', function () {
+    Task::factory()->create(['user_id' => $this->user->id, 'status' => 'todo']);
+    Task::factory()->create(['user_id' => $this->user->id, 'status' => 'todo']);
+    Task::factory()->create(['user_id' => $this->user->id, 'status' => 'in_progress']);
+    Task::factory()->create(['user_id' => $this->user->id, 'status' => 'completed']);
+
+    Task::factory()->create([
+        'user_id' => $this->user->id,
+        'status' => 'todo',
+        'due_date' => now()->subDay()->toDateString(),
+    ]);
+
+    $response = $this->getJson('/api/tasks/stats');
+
+    $response->assertStatus(200)
+        ->assertJson([
+            'todo' => 2,
+            'in_progress' => 1,
+            'completed' => 1,
+            'due' => 1,
+            'total' => 5,
+        ]);
 });

@@ -27,6 +27,7 @@ class TaskFactory extends Factory
             'description' => $this->faker->paragraph(),
             'status' => $this->faker->randomElement(['todo', 'in_progress', 'completed', 'due']),
             'due_date' => $this->faker->dateTimeBetween('now', '+1 month')->format('Y-m-d'),
+            'due_time' => $this->faker->optional(0.7)->time('H:i'), // ৭০% সম্ভাবনা সময় থাকার, ফরম্যাট: HH:MM
         ];
     }
 }

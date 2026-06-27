@@ -6,6 +6,7 @@ use Database\Factories\TaskFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 class Task extends Model
 {
@@ -19,6 +20,7 @@ class Task extends Model
         'description',
         'status',
         'due_date',
+        'due_time',
     ];
 
     /**
@@ -37,12 +39,15 @@ class Task extends Model
     protected static function booted(): void
     {
         static::retrieved(function (Task $task) {
-            // যদি টাস্ক সম্পন্ন না হয়ে থাকে, due_date থাকে এবং তা আজকের দিনের চেয়ে ছোট হয়
-            if ($task->status !== 'completed' && $task->due_date && $task->due_date < now()->toDateString()) {
-                // স্ট্যাটাস যদি আগে থেকে 'due' না হয়ে থাকে, তবে তা 'due' করে ডাটাবেজে সেভ করবে
-                if ($task->status !== 'due') {
+            if ($task->status !== 'completed' && $task->due_date) {
+                // ডেট এবং টাইম জোড়া দিয়ে কার্বন অবজেক্ট তৈরি করছি (টাইম না থাকলে দিনের শেষ সময় ধরা হবে)
+                $dueDateTimeString = $task->due_date.($task->due_time ? ' '.$task->due_time : ' 23:59:59');
+                $dueDateTime = Carbon::parse($dueDateTimeString);
+
+                // যদি সময় পার হয়ে গিয়ে থাকে এবং স্ট্যাটাস due না থাকে
+                if ($dueDateTime->isPast() && $task->status !== 'due') {
                     $task->status = 'due';
-                    $task->saveQuietly(); // saveQuietly() ব্যবহার করলে পুনরায় এই ইভেন্ট লুপে পড়বে না
+                    $task->saveQuietly();
                 }
             }
         });

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('status')->default('todo')->comment('Possible values: todo, in_progress, completed, due');
             $table->date('due_date')->nullable();
+            $table->time('due_time')->nullable();
             $table->timestamps();
         });
     }
