@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Http\Resources\CategoryResource;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -49,8 +49,12 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Category $category)
+    public function show(string $idOrSlug)
     {
+        $category = Category::where('id', $idOrSlug)
+            ->orWhere('slug', $idOrSlug)
+            ->firstOrFail();
+
         return response()->json([
             'success' => true,
             'message' => 'Category fetched successfully',
@@ -61,11 +65,15 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, string $idOrSlug)
     {
+        $category = Category::where('id', $idOrSlug)
+            ->orWhere('slug', $idOrSlug)
+            ->firstOrFail();
+
         // ইনপুট ভ্যালিডেশন (নামটি ইউনিক হতে হবে তবে নিজের আইডির জন্য ছাড় থাকবে)
         $validated = $request->validate([
-            'name' => 'required|string|unique:categories,name,' . $category->id . '|max:255',
+            'name' => 'required|string|unique:categories,name,'.$category->id.'|max:255',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
@@ -82,8 +90,12 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy(string $idOrSlug)
     {
+        $category = Category::where('id', $idOrSlug)
+            ->orWhere('slug', $idOrSlug)
+            ->firstOrFail();
+
         $category->delete();
 
         return response()->json([

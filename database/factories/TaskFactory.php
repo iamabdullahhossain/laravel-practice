@@ -2,14 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use App\Models\Task;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
 /**
  * @extends Factory<Task>
  */
-use App\Models\Category;
-use \App\Models\User;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TaskFactory extends Factory
 {
@@ -21,12 +20,12 @@ class TaskFactory extends Factory
     public function definition(): array
     {
         return [
-            
-            'user_id' =>  User::factory(),
+
+            'user_id' => User::factory(),
             'category_id' => Category::factory(),
             'title' => $this->faker->sentence(),
             'description' => $this->faker->paragraph(),
-            'is_completed' => $this->faker->boolean(20), // 20% chance of being completed
+            'status' => $this->faker->randomElement(['todo', 'in_progress', 'completed', 'due']),
             'due_date' => $this->faker->dateTimeBetween('now', '+1 month')->format('Y-m-d'),
         ];
     }

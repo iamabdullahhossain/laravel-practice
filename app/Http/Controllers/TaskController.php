@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Task;
 use App\Http\Resources\TaskResource;
+use App\Models\Task;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -15,7 +15,7 @@ class TaskController extends Controller
     {
         // শুধুমাত্র বর্তমান লগইন করা ইউজারের টাস্কগুলো নিয়ে আসবে
         $tasks = $request->user()->tasks()->with('category')->get();
-        
+
         return TaskResource::collection($tasks);
     }
 
@@ -29,7 +29,8 @@ class TaskController extends Controller
             'category_id' => 'required|exists:categories,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'is_completed' => 'nullable|boolean',
+            'status' => 'nullable|string|in:todo,in_progress,completed,due',
+
             'due_date' => 'nullable|date',
         ]);
 
@@ -50,6 +51,7 @@ class TaskController extends Controller
         abort_if($task->user_id !== $request->user()->id, 403, 'Unauthorized.');
 
         $task->load('category');
+
         return new TaskResource($task);
     }
 
@@ -65,7 +67,8 @@ class TaskController extends Controller
             'category_id' => 'required|exists:categories,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'is_completed' => 'required|boolean',
+            'status' => 'required|string|in:todo,in_progress,completed,due',
+
             'due_date' => 'nullable|date',
         ]);
 

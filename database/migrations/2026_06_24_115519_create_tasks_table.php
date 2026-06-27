@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->boolean('is_completed')->default(false);
+            $table->string('status')->default('todo')->comment('Possible values: todo, in_progress, completed, due');
             $table->date('due_date')->nullable();
             $table->timestamps();
         });

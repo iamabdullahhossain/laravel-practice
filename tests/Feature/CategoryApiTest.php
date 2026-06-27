@@ -1,6 +1,12 @@
 <?php
 
 use App\Models\Category;
+use App\Models\User;
+
+beforeEach(function () {
+    $this->user = User::factory()->create();
+    $this->actingAs($this->user);
+});
 
 test('can list all categories', function () {
     // ডাটাবেজে ৩টি ফেক ক্যাটাগরি তৈরি করছি
@@ -20,7 +26,7 @@ test('can create a category', function () {
         'name' => 'Urgent Tasks',
     ]);
 
-    // রেসপন্স ২০১ (Created) এবং সঠিক ডাটা এসেছে কিনা চেক করছি
+    // -রেসপন্স ২০১ (Created) এবং সঠিক ডাটা এসেছে কিনা চেক করছি
     $response->assertStatus(201)
         ->assertJsonPath('data.name', 'Urgent Tasks')
         ->assertJsonPath('data.slug', 'urgent-tasks');
@@ -46,7 +52,7 @@ test('validation prevents creating category with duplicate name', function () {
         ->assertJsonValidationErrors(['name']);
 });
 
-test('can update a category', function () {
+test('can update a category by id', function () {
     $category = Category::factory()->create(['name' => 'Work', 'slug' => 'work']);
 
     // ক্যাটাগরি আপডেট করার জন্য রিকোয়েস্ট পাঠাচ্ছি
@@ -59,16 +65,58 @@ test('can update a category', function () {
         ->assertJsonPath('data.slug', 'updated-work');
 });
 
-test('can delete a category', function () {
+test('can delete a category by id', function () {
     $category = Category::factory()->create();
 
     // ক্যাটাগরি ডিলিট করার জন্য রিকোয়েস্ট পাঠাচ্ছি
     $response = $this->deleteJson("/api/categories/{$category->id}");
 
-    // রেসপন্স ২০৪ (No Content) এসেছে কিনা চেক করছি
-    $response->assertStatus(204);
+    // রেসপন্স ২০০ এসেছে কিনা চেক করছি
+    $response->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'message' => 'Category deleted successfully',
+        ]);
 
     // ডাটাবেজ থেকে মুছে গেছে কিনা চেক করছি
+    $this->assertDatabaseMissing('categories', [
+        'id' => $category->id,
+    ]);
+});
+
+test('can show a category by its slug', function () {
+    $category = Category::factory()->create(['name' => 'Work', 'slug' => 'work']);
+
+    $response = $this->getJson('/api/categories/work');
+
+    $response->assertStatus(200)
+        ->assertJsonPath('data.name', 'Work')
+        ->assertJsonPath('data.slug', 'work');
+});
+
+test('can update a category by its slug', function () {
+    $category = Category::factory()->create(['name' => 'Work', 'slug' => 'work']);
+
+    $response = $this->putJson('/api/categories/work', [
+        'name' => 'Updated Work',
+    ]);
+
+    $response->assertStatus(200)
+        ->assertJsonPath('data.name', 'Updated Work')
+        ->assertJsonPath('data.slug', 'updated-work');
+});
+
+test('can delete a category by its slug', function () {
+    $category = Category::factory()->create(['name' => 'Work', 'slug' => 'work']);
+
+    $response = $this->deleteJson('/api/categories/work');
+
+    $response->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'message' => 'Category deleted successfully',
+        ]);
+
     $this->assertDatabaseMissing('categories', [
         'id' => $category->id,
     ]);
