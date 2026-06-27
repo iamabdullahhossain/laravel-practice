@@ -64,6 +64,9 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // নতুন টোকেন তৈরির আগে আগের সব টোকেন ডিলিট করে দেওয়া
+        $user->tokens()->delete();
+
         // টোকেন জেনারেট করা
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -87,6 +90,7 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
+            'status' => true,
             'message' => 'Successfully logged out.',
         ]);
     }
