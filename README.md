@@ -1,58 +1,109 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Task Management API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A secure, restful Task Management API built using Laravel 13 (PHP 8.5) and Laravel Sanctum for user authentication.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **User Authentication**: Secure registration, login, logout, and profile endpoints via Sanctum Bearer tokens.
+- **Change Password**: Dedicated secure endpoint for updating user password with verification.
+- **Category Management**: Organize tasks into different categories (Full CRUD capabilities).
+- **Task Management**:
+  - Full CRUD operations.
+  - Custom status workflows (`todo`, `in_progress`, `completed`, `due`).
+  - Single-field status updates (`PATCH /api/tasks/{id}/status`).
+  - Nullable deadline dates and times (`due_date` and `due_time`).
+  - **Auto-Expiry**: Expired tasks automatically transition to `due` status upon retrieval if they are not already marked `completed`.
+- **Task Statistics**: Get count of tasks grouped by status (`GET /api/tasks/stats`).
+- **Pest PHP Testing**: Fully covered feature tests covering all APIs and status transition rules.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Prerequisites
 
-## Learning Laravel
+- **PHP** >= 8.5
+- **Composer**
+- **SQLite** (or MySQL)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Setup Instructions
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
+### 1. Clone & Install Dependencies
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Configure Environment
+Copy the `.env.example` file to `.env`:
+```bash
+cp .env.example .env
+```
+Ensure your database driver is configured. By default, SQLite is used:
+```env
+DB_CONNECTION=sqlite
+# DB_DATABASE=database/database.sqlite
+```
 
-## Contributing
+### 3. Generate Application Key
+```bash
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. Run Migrations & Seeders
+Build the database tables and populate them with dummy data (1 test user, 5 categories, and 10 tasks):
+```bash
+php artisan migrate:fresh --seed
+```
+*Default seeded user login credentials:*
+- **Username**: `iamabdullahhossain`
+- **Password**: `12345678`
 
-## Code of Conduct
+### 5. Run Server
+Start the local development server:
+```bash
+php artisan serve
+```
+The API will be accessible at: `http://127.0.0.1:8000/api`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## API Documentation
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Public Endpoints
+| Endpoint | Method | Payload / Request Body | Description |
+| :--- | :---: | :--- | :--- |
+| `/api/register` | `POST` | `name`, `username`, `password` | Register a new user |
+| `/api/login` | `POST` | `username`, `password` | Authenticate user and get Bearer Token |
 
-## License
+### Protected Endpoints (Requires `Authorization: Bearer {token}`)
+| Endpoint | Method | Payload / Request Body | Description |
+| :--- | :---: | :--- | :--- |
+| `/api/user` | `GET` | *None* | Get authenticated user profile |
+| `/api/change-password` | `POST` | `old_password`, `new_password`, `confirm_password` | Securely change user password |
+| `/api/logout` | `POST` | *None* | Revoke current Bearer Token |
+| `/api/categories` | `GET` | *None* | List all user categories |
+| `/api/categories` | `POST` | `name` | Create a new category |
+| `/api/categories/{id}` | `GET` | *None* | View a single category |
+| `/api/categories/{id}` | `PUT` | `name` | Update a category |
+| `/api/categories/{id}` | `DELETE` | *None* | Delete a category |
+| `/api/tasks` | `GET` | *None* | List all user tasks |
+| `/api/tasks/stats` | `GET` | *None* | Get task counts grouped by status |
+| `/api/tasks` | `POST` | `category_id`, `title`, `description`, `status`, `due_date`, `due_time` | Create a new task |
+| `/api/tasks/{id}` | `GET` | *None* | View a single task |
+| `/api/tasks/{id}` | `PUT` | `category_id`, `title`, `description`, `status`, `due_date`, `due_time` | Update a task |
+| `/api/tasks/{id}/status` | `PATCH` | `status` | Update only the status of a task |
+| `/api/tasks/{id}` | `DELETE` | *None* | Delete a task |
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## Running Tests
+Run the Pest PHP test suite to verify the application:
+```bash
+php artisan test --compact
+```
+
+## Postman Collection
+An automated Postman collection is included in the project:
+👉 [task-management-api.postman_collection.json](./task-management-api.postman_collection.json)
+
+*Note: Importing this file to Postman sets up all endpoints with dynamic token harvesting. Once you log in or register, the token will automatically populate for the remaining endpoints.*

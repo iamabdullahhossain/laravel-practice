@@ -40,7 +40,7 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'username' => $user->username,
-            ]
+            ],
         ], 201);
     }
 
@@ -58,9 +58,9 @@ class AuthController extends Controller
         $user = User::where('username', $request->username)->first();
 
         // পাসওয়ার্ড যাচাই করা
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
-                'message' => 'Invalid login credentials.'
+                'message' => 'Invalid login credentials.',
             ], 401);
         }
 
@@ -74,7 +74,7 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'username' => $user->username,
-            ]
+            ],
         ]);
     }
 
@@ -87,7 +87,41 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
-            'message' => 'Successfully logged out.'
+            'message' => 'Successfully logged out.',
+        ]);
+    }
+
+    /**
+     * Change User Password
+     */
+    public function changePassword(Request $request)
+    {
+        // ১. ইনপুট ভ্যালিডেশন
+        $request->validate([
+            'old_password' => 'required|string',
+            'new_password' => 'required|string|min:6',
+            // confirm_password অবশ্যই new_password এর সাথে মিলতে হবে
+            'confirm_password' => 'required|string|same:new_password',
+        ]);
+
+        $user = $request->user();
+
+        // ২. বর্তমান পাসওয়ার্ড সঠিক কিনা চেক করা
+        if (! Hash::check($request->old_password, $user->password)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'The provided old password does not match our records.',
+            ], 422);
+        }
+
+        // ৩. নতুন পাসওয়ার্ড হ্যাশ করে আপডেট করা
+        $user->update([
+            'password' => Hash::make($request->new_password),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Password changed successfully.',
         ]);
     }
 }
